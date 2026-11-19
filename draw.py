@@ -188,11 +188,9 @@ person(530, ground + 70, 126, (30, 46, 90), arm=(-26, 14), hair="trump")
 
 
 def name_tag(cx, y, name):
-    """A white name tag with an ink border, legible over sky, skyline or carpet alike."""
-    f = font("arialbd.ttf", 17)
-    tw = d.textlength(name, font=f) / S
-    rect(cx - tw / 2 - 7, y, cx + tw / 2 + 7, y + 24, fill=(255, 255, 255), outline=INK, width=1.5, r=5)
-    text(cx, y + 3, name, f, anchor="ma")
+    """A bold name with a thin white halo (no box), legible over sky, skyline or carpet alike."""
+    f = font("arialbd.ttf", 19)
+    d.text((cx * S, (y + 3) * S), name, font=f, fill=INK, anchor="ma", stroke_width=int(2.5 * S), stroke_fill=(255, 255, 255))
 
 
 name_tag(462, ground - 78, "XI")  # above the heads, in the open sky between the towers

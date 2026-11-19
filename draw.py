@@ -86,7 +86,7 @@ def arrowhead(p_from, p_to, size, fill):
           (p_to[0] + size * math.cos(b), p_to[1] + size * math.sin(b))], fill=fill)
 
 
-def person(cx, base, h, coat, skin=(232, 196, 160), arm=None):
+def person(cx, base, h, coat, skin=(232, 196, 160), arm=None, hair=None):
     """A simple standing figure: head, suit body, legs. arm=(dx, dy) reaches one hand out."""
     head_r = h * 0.11
     dot(cx, base - h + head_r, head_r, skin)
@@ -99,6 +99,34 @@ def person(cx, base, h, coat, skin=(232, 196, 160), arm=None):
         sx = cx + (h * 0.13 if arm[0] > 0 else -h * 0.13)
         line([(sx, body_top + h * 0.06), (sx + arm[0], body_top + h * 0.06 + arm[1])], fill=coat, width=h * 0.07)
         dot(sx + arm[0], body_top + h * 0.06 + arm[1], h * 0.04, skin)
+    if hair:
+        draw_hair(cx, base - h + head_r, head_r, hair, skin)
+
+
+def draw_hair(cx, cy, r, style, skin):
+    """Each leader's hair, drawn over the head circle (centre cx, cy; radius r)."""
+    if style == "xi":  # short, dense black hair, combed back with a side part
+        black = (28, 28, 32)
+        d.pieslice(sc(cx - r * 1.06, cy - r * 1.16, cx + r * 1.06, cy + r * 0.9), 180, 360, fill=black)
+        d.ellipse(sc(cx - r * 0.78, cy - r * 0.62, cx + r * 0.78, cy + r * 0.9), fill=skin)  # high, arched hairline
+        rect(cx - r * 1.04, cy - r * 0.2, cx - r * 0.8, cy + r * 0.25, fill=black)  # sideburns
+        rect(cx + r * 0.8, cy - r * 0.2, cx + r * 1.04, cy + r * 0.25, fill=black)
+        line([(cx - r * 0.35, cy - r * 1.05), (cx - r * 0.45, cy - r * 0.5)], fill=(70, 70, 76), width=max(1, r * 0.08))
+    elif style == "trump":  # voluminous golden-blond hair swept forward over the brow
+        gold, shade = (236, 196, 96), (204, 160, 64)
+        d.pieslice(sc(cx - r * 1.12, cy - r * 1.3, cx + r * 1.12, cy + r * 0.8), 180, 360, fill=gold)
+        poly([(cx - r * 1.12, cy - r * 0.25), (cx - r * 0.9, cy - r * 0.95), (cx + r * 0.2, cy - r * 1.25),
+              (cx + r * 1.0, cy - r * 0.9), (cx + r * 1.35, cy - r * 0.3), (cx + r * 0.75, cy - r * 0.45),
+              (cx - r * 0.2, cy - r * 0.5)], fill=gold)  # the forward sweep, past the brow
+        line([(cx - r * 0.7, cy - r * 0.8), (cx + r * 0.3, cy - r * 1.0), (cx + r * 1.05, cy - r * 0.45)], fill=shade, width=max(1, r * 0.1))
+        rect(cx - r * 1.1, cy - r * 0.3, cx - r * 0.86, cy + r * 0.2, fill=gold)  # sides
+        rect(cx + r * 0.86, cy - r * 0.3, cx + r * 1.1, cy + r * 0.2, fill=gold)
+    elif style == "putin":  # thin, receding light-brown hair: a fringe at the sides and back, a bare crown
+        thin = (176, 150, 112)
+        d.pieslice(sc(cx - r * 1.04, cy - r * 1.06, cx + r * 1.04, cy + r * 1.0), 180, 360, fill=thin)
+        d.ellipse(sc(cx - r * 0.72, cy - r * 1.02, cx + r * 0.72, cy + r * 0.2), fill=skin)  # receding hairline
+        rect(cx - r * 1.03, cy - r * 0.15, cx - r * 0.84, cy + r * 0.2, fill=thin)
+        rect(cx + r * 0.84, cy - r * 0.15, cx + r * 1.03, cy + r * 0.2, fill=thin)
 
 
 def panel(x0, y0, x1, y1, tag, tag_color):
@@ -155,13 +183,23 @@ line([(px + 60, py + 15), (px + 300, py + 10)], fill=BLUE, width=3)
 poly([(px + 250, py + 22), (px + 262, py + 22), (px + 300, ground + 18), (px + 284, ground + 18)], fill=(180, 180, 186))
 poly([(px + 290, ground + 18), (px + 330, ground + 18), (ax1 - 60, ay1), (px + 300, ay1)], fill=RED)
 # Xi greeting Trump
-person(470, ground + 70, 120, (40, 44, 56), arm=(26, 14))
-person(530, ground + 70, 126, (30, 46, 90), arm=(-26, 14))
-text(470, ground + 74, "XI", F_LBL, anchor="ma")
-text(530, ground + 74, "TRUMP", F_LBL, anchor="ma")
+person(470, ground + 70, 120, (40, 44, 56), arm=(26, 14), hair="xi")
+person(530, ground + 70, 126, (30, 46, 90), arm=(-26, 14), hair="trump")
+
+
+def name_tag(cx, y, name):
+    """A white name tag with an ink border, legible over sky, skyline or carpet alike."""
+    f = font("arialbd.ttf", 17)
+    tw = d.textlength(name, font=f) / S
+    rect(cx - tw / 2 - 7, y, cx + tw / 2 + 7, y + 24, fill=(255, 255, 255), outline=INK, width=1.5, r=5)
+    text(cx, y + 3, name, f, anchor="ma")
+
+
+name_tag(462, ground - 78, "XI")  # above the heads, in the open sky between the towers
+name_tag(538, ground - 83, "TRUMP")
 # Putin in a small inset frame: he met Xi first
 rect(ax1 - 118, ay0 + 10, ax1 - 10, ay0 + 120, fill=(255, 253, 248), outline=INK, width=1.5, r=6)
-person(ax1 - 64, ay0 + 102, 70, (60, 60, 64))
+person(ax1 - 64, ay0 + 102, 70, (60, 60, 64), hair="putin")
 text(ax1 - 64, ay0 + 104, "PUTIN", F_LBL, anchor="ma")
 # story text on the right
 panel_tag = "ASIA-PACIFIC · APEC SUMMIT"
